@@ -5,7 +5,8 @@ import com.favorites.domain.User;
 import com.favorites.repository.UserRepository;
 import com.favorites.utils.Des3EncryptionUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -19,7 +20,7 @@ import java.util.Set;
 
 public class SecurityFilter implements Filter {
 
-	protected Logger logger = Logger.getLogger(this.getClass());
+	protected Logger logger =  LoggerFactory.getLogger(this.getClass());
 	private static Set<String> GreenUrlSet = new HashSet<String>();
 
 	@Autowired
@@ -67,7 +68,7 @@ public class SecurityFilter implements Filter {
 						if(StringUtils.isNotBlank(value)){
 							userId = Long.parseLong(value);
 						}
-						User user = userRepository.findOne(userId);
+						User user = userRepository.findById((long)userId);
 						String html = "";
 						if(null == user){
 							html = "<script type=\"text/javascript\">window.location.href=\"_BP_login\"</script>";
@@ -75,8 +76,7 @@ public class SecurityFilter implements Filter {
 							logger.info("userId :" + user.getId());
 							request.getSession().setAttribute(Const.LOGIN_SESSION_KEY, user);
 							String referer = this.getRef(request);
-							if(referer.indexOf("/collect?") >= 0 || referer.indexOf("/lookAround/standard/") >= 0
-									|| referer.indexOf("/lookAround/simple/") >= 0){
+							if(referer.indexOf("/collect?") >= 0 || referer.indexOf("/lookAround") >= 0){
 								filterChain.doFilter(srequest, sresponse);
 								return;
 							}else{
@@ -96,8 +96,7 @@ public class SecurityFilter implements Filter {
 					String referer = this.getRef(request);
 					logger.debug("security filter, deney, " + request.getRequestURI());
 					String html = "";
-					if(referer.contains("/collect?") || referer.contains("/lookAround/standard/")
-							|| referer.contains("/lookAround/simple/")){
+					if(referer.contains("/collect?") || referer.contains("/lookAround")){
 						html = "<script type=\"text/javascript\">window.location.href=\"_BP_login\"</script>";
 					}else{
 						html = "<script type=\"text/javascript\">window.location.href=\"_BP_index\"</script>";
@@ -110,8 +109,7 @@ public class SecurityFilter implements Filter {
 				String referer = this.getRef(request);
 				logger.debug("security filter, deney, " + request.getRequestURI());
 				String html = "";
-				if(referer.contains("/collect?") || referer.contains("/lookAround/standard/")
-						|| referer.contains("/lookAround/simple/")){
+				if(referer.contains("/collect?") || referer.contains("/lookAround")){
 					html = "<script type=\"text/javascript\">window.location.href=\"_BP_login\"</script>";
 				}else{
 					html = "<script type=\"text/javascript\">window.location.href=\"_BP_index\"</script>";
@@ -170,13 +168,10 @@ public class SecurityFilter implements Filter {
 				|| (url.contains("/collector") && !url.contains("/collect/detail/"))
 				|| url.contains("/collect/standard/")||url.contains("/collect/simple/")
 				|| url.contains("/user")||url.contains("/favorites")||url.contains("/comment")
-				|| url.startsWith("/lookAround/standard/")
-				|| url.startsWith("/lookAround/simple/")
+				|| url.contains("/lookAround")
 				|| url.startsWith("/user/")
 				|| url.startsWith("/feedback")
-				|| url.startsWith("/standard/")
-				|| url.startsWith("/collect/standard/lookAround/")
-				|| url.startsWith("/collect/simple/lookAround/")) {
+				|| url.startsWith("/standard/")) {
 			return true;
 		} else {
 			return false;

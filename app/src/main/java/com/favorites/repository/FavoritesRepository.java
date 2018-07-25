@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import com.favorites.domain.Collect;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,9 +15,13 @@ import com.favorites.domain.Favorites;
 
 public interface FavoritesRepository extends JpaRepository<Favorites, Long> {
 
+	Favorites findById(long  id);
+
 	List<Favorites> findByUserId(Long userId);
 
-	List<Favorites> findByUserIdOrderByIdDesc(Long userId);
+	List<Favorites> findByUserIdOrderByLastModifyTimeDesc(Long userId);
+
+	List<Favorites> findByUserIdOrderByLastModifyTimeAsc(Long userId);
 
 	Favorites findByUserIdAndName(Long userId,String name);
 

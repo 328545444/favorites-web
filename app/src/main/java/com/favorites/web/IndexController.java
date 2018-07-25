@@ -72,7 +72,7 @@ public class IndexController extends BaseController{
 	public String home(Model model) {
 		long size= collectRepository.countByUserIdAndIsDelete(getUserId(),IsDelete.NO);
 		Config config = configRepository.findByUserId(getUserId());
-		Favorites favorites = favoritesRepository.findOne(Long.parseLong(config.getDefaultFavorties()));
+		Favorites favorites = favoritesRepository.findById(Long.parseLong(config.getDefaultFavorties()));
 		List<String> followList = followRepository.findByUserId(getUserId());
 		model.addAttribute("config",config);
 		model.addAttribute("favorites",favorites);
@@ -87,37 +87,27 @@ public class IndexController extends BaseController{
 	}
 
 	/**
-	 * 随便看看 标准模式显示  added by chenzhimin 暂时去掉，以后优化更新
+	 * 随便看看 标准模式显示
 	 * @return
 	 */
-	/*@RequestMapping(value="/lookAround/standard/{category}")
+	@RequestMapping(value="/lookAround")
 	@LoggerManage(description="随便看看页面")
 	public String lookAroundStandard(Model model,@RequestParam(value = "page", defaultValue = "0") Integer page,
-							 @RequestParam(value = "size", defaultValue = "15") Integer size,
-							 @PathVariable("category") String category) {
+							 @RequestParam(value = "size", defaultValue = "15") Integer size) {
 
 		Sort sort = new Sort(Sort.Direction.DESC, "id");
-		Pageable pageable = new PageRequest(page, size, sort);
-		model.addAttribute("category", category);
+		Pageable pageable = PageRequest.of(page, size,sort);
 		model.addAttribute("type", "lookAround");
-		Favorites favorites = new Favorites();
-		List<CollectSummary> collects = null;
-		List<CollectSummary> fivecollects = lookAroundService.scrollFiveCollect();
-		List<UserIsFollow> fiveUsers = lookAroundService.queryFiveUser(this.getUserId());
-
-		collects =lookAroundService.queryCollectExplore(pageable,getUserId(),category);
+		List<CollectSummary> collects =lookAroundService.queryCollectExplore(pageable,getUserId(),null);
 		User user = super.getUser();
 		if(null != user){
 			model.addAttribute("user",user);
 		}
-		model.addAttribute("fiveCollects", fivecollects);
-		model.addAttribute("fiveUsers", fiveUsers);
 		model.addAttribute("collects", collects);
-		model.addAttribute("favorites", favorites);
 		model.addAttribute("userId", getUserId());
 		model.addAttribute("size", collects.size());
 		return "lookAround/standard";
-	}*/
+	}
 
 	/**
 	 * 随便看看 简单模式显示  added by chenzhimin
@@ -130,7 +120,7 @@ public class IndexController extends BaseController{
 									 @PathVariable("category") String category) {
 
 		Sort sort = new Sort(Sort.Direction.DESC, "id");
-		Pageable pageable = new PageRequest(page, size, sort);
+		Pageable pageable = PageRequest.of(page, size,sort);
 		model.addAttribute("category", category);
 		model.addAttribute("type", "lookAround");
 		Favorites favorites = new Favorites();
@@ -197,7 +187,7 @@ public class IndexController extends BaseController{
 	@LoggerManage(description="意见反馈页面")
 	public String feedback(Model model){
 		User user = null;
-		user = userRepository.findOne(getUserId());
+		user = userRepository.findById(getUserId());
 		model.addAttribute("user", user);
 		return "favorites/feedback";
 	}
@@ -205,7 +195,7 @@ public class IndexController extends BaseController{
 	@RequestMapping(value="/collect",method=RequestMethod.GET)
 	@LoggerManage(description="收藏页面")
 	public String collect(Model model) {
-		List<Favorites> favoritesList = favoritesRepository.findByUserIdOrderByIdDesc(getUserId());
+		List<Favorites> favoritesList = favoritesRepository.findByUserIdOrderByLastModifyTimeDesc(getUserId());
 		Config config = configRepository.findByUserId(getUserId());
 		List<String> followList = followRepository.findByUserId(getUserId());
 		logger.info("model：" + config.getDefaultModel());
@@ -270,15 +260,15 @@ public class IndexController extends BaseController{
      */
     @RequestMapping(value="/collector/{userId}/{favoritesId:[0-9]*}")
     @LoggerManage(description="首页收藏家个人首页")
-    public String collectorPageShow(Model model, @PathVariable("userId") Long userId, @PathVariable("favoritesId") Long favoritesId, @RequestParam(value = "page", defaultValue = "0") Integer page,
+    public String collectorPageShow(Model model, @PathVariable("userId") long userId, @PathVariable("favoritesId") Long favoritesId, @RequestParam(value = "page", defaultValue = "0") Integer page,
                                  @RequestParam(value = "size", defaultValue = "15") Integer size){
-        User user = userRepository.findOne(userId);
+        User user = userRepository.findById(userId);
         Long collectCount = 0l;
         Sort sort = new Sort(Sort.Direction.DESC, "id");
-        Pageable pageable = new PageRequest(page, size, sort);
+        Pageable pageable = PageRequest.of(page, size,sort);
         List<CollectSummary> collects = null;
         Integer isFollow = 0;
-        if(getUserId().longValue() == userId.longValue()){
+        if(getUserId() == userId){
             model.addAttribute("myself",IsDelete.YES.toString());
             collectCount = collectRepository.countByUserIdAndIsDelete(userId,IsDelete.NO);
             if(0 == favoritesId){
@@ -302,7 +292,7 @@ public class IndexController extends BaseController{
         List<String> followUser = followRepository.findFollowUserByUserId(userId);
         List<String> followedUser = followRepository.findFollowedUserByFollowId(userId);
 		Config config = configRepository.findByUserId(getUserId());
-        if(getUserId()==null||getUserId()==0){
+        if(getUserId()==0||getUserId()==0){
 			config = configRepository.findByUserId(userId);
 		}
         model.addAttribute("collectCount",collectCount);

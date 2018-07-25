@@ -2,11 +2,12 @@ package com.favorites.utils;
 
 import com.favorites.comm.Const;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -21,8 +22,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HtmlUtil {
-	
-    private static Logger logger = Logger.getLogger(HtmlUtil.class);
+
+	public static Logger logger =  LoggerFactory.getLogger(HtmlUtil.class);
 	/**
 	 * @param url
 	 * @return
@@ -30,7 +31,7 @@ public class HtmlUtil {
 	public static String getImge(String url){
 		String logo="";
 		logo=getPageImg(url);
-		if(StringUtils.isBlank(logo)){
+		if(StringUtils.isBlank(logo) || logo.length()>300){
 			logo=Const.BASE_PATH + Const.default_logo;
 		}
 		return logo;
@@ -59,27 +60,29 @@ public class HtmlUtil {
 				}
 				// 判断图片大小
 				String fileUrl = download(imgUrl);
-				File picture = new File(fileUrl);
-				FileInputStream in = new FileInputStream(picture);
-				BufferedImage sourceImg = ImageIO.read(in);
-				String weight = String.format("%.1f",picture.length()/1024.0);
-				int width = sourceImg.getWidth();
-				int height = sourceImg.getHeight();
-				// 删除临时文件
-				if(picture.exists()){
-					in.close();
-					picture.delete();
-				}
-				if(Double.parseDouble(weight) <= 0 || width <=0 || height <= 0){
-					logger.info("当前图片大小为0，继续获取图片链接");
-					imgUrl="";
-				}else{
-					break;
+				if(fileUrl!=null){
+					File picture = new File(fileUrl);
+					FileInputStream in = new FileInputStream(picture);
+					BufferedImage sourceImg = ImageIO.read(in);
+					String weight = String.format("%.1f",picture.length()/1024.0);
+					int width = sourceImg.getWidth();
+					int height = sourceImg.getHeight();
+					// 删除临时文件
+					if(picture.exists()){
+						in.close();
+						picture.delete();
+					}
+					if(Double.parseDouble(weight) <= 0 || width <=0 || height <= 0){
+						logger.info("当前图片大小为0，继续获取图片链接");
+						imgUrl="";
+					}else{
+						break;
+					}
 				}
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
-			logger.error("getPageImg失败,url:"+url,e);
+			logger.warn("getPageImg  失败,url:"+url,e.getMessage());
 		}
 		return imgUrl;
 	}

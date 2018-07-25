@@ -77,7 +77,7 @@ public class CollectController extends BaseController{
 	@LoggerManage(description="文章收集")
 	public Response collect(Collect collect) {		
 		try {
-			if(StringUtils.isBlank(collect.getLogoUrl())){
+			if(StringUtils.isBlank(collect.getLogoUrl()) || collect.getLogoUrl().length()>300){
 				collect.setLogoUrl(Const.BASE_PATH + Const.default_logo);
 			}
 			collect.setUserId(getUserId());
@@ -125,7 +125,7 @@ public class CollectController extends BaseController{
 		Long result = null;
 		int faultPosition = 0;
 		Map<String,Object> maps = new HashMap<String,Object>();
-		List<Favorites> favoritesList = this.favoritesRepository.findByUserIdOrderByIdDesc(getUserId());
+		List<Favorites> favoritesList = this.favoritesRepository.findByUserIdOrderByLastModifyTimeDesc(getUserId());
 		for (int i = 0; i < favoritesList.size(); i++){
 			Favorites favorites = favoritesList.get(i);
 			if(favorites.getName().indexOf(title) > 0 || favorites.getName().indexOf(description) > 0){
@@ -156,7 +156,7 @@ public class CollectController extends BaseController{
 	        @PathVariable("favoritesId") Long favoritesId,@PathVariable("userId") Long userId,
 			@PathVariable("category") String category) {
 		  Sort sort = new Sort(Direction.DESC, "id");
-	    Pageable pageable = new PageRequest(page, size, sort);
+	    Pageable pageable = PageRequest.of(page, size,sort);
 	    List<CollectSummary> collects = null;
 	    if("otherpublic".equalsIgnoreCase(type)){
 	    	if(null != favoritesId && 0 != favoritesId){
@@ -177,7 +177,16 @@ public class CollectController extends BaseController{
 	    }
 		return collects;
 	}
-	
+
+	@RequestMapping(value="/lookAround")
+	@LoggerManage(description="查看更多lookAround")
+	public List<CollectSummary> lookAround(@RequestParam(value = "page", defaultValue = "0") Integer page,
+										 @RequestParam(value = "size", defaultValue = "15") Integer size) {
+		Sort sort = new Sort(Direction.DESC, "id");
+		Pageable pageable = PageRequest.of(page, size, sort);
+		List<CollectSummary> collects =lookAroundService.queryCollectExplore(pageable, getUserId(),null);
+		return collects;
+	}
 	
 	/**
 	 * @author neo
@@ -194,7 +203,7 @@ public class CollectController extends BaseController{
 	        @PathVariable("favoritesId") Long favoritesId,@PathVariable("userId") Long userId
 			,@PathVariable("category") String category) {
 		Sort sort = new Sort(Direction.DESC, "id");
-	    Pageable pageable = new PageRequest(page, size, sort);
+	    Pageable pageable = PageRequest.of(page, size,sort);
 	    List<CollectSummary> collects = null;
 	    if("otherpublic".equalsIgnoreCase(type)){
 	    	if(null != favoritesId && 0 != favoritesId){
@@ -254,9 +263,9 @@ public class CollectController extends BaseController{
 	 * @return
 	 */
 	@RequestMapping(value="/delete/{id}")
-	public Response delete(@PathVariable("id") Long id) {
-		Collect collect = collectRepository.findOne(id);
-		if(null != collect && getUserId().equals(collect.getUserId())){
+	public Response delete(@PathVariable("id") long id) {
+		Collect collect = collectRepository.findById(id);
+		if(null != collect && getUserId()==collect.getUserId()){
 		  collectRepository.deleteById(id);
 			if(null != collect.getFavoritesId() && !IsDelete.YES.equals(collect.getIsDelete())){
 				favoritesRepository.reduceCountById(collect.getFavoritesId(), DateUtils.getCurrentTime());
@@ -264,7 +273,6 @@ public class CollectController extends BaseController{
 		}
 		return result();
 	}
-	
 	
 	/**
 	 * @author neo
@@ -274,7 +282,7 @@ public class CollectController extends BaseController{
 	 */
 	@RequestMapping(value="/detail/{id}")
 	public Collect detail(@PathVariable("id") long id) {
-		Collect collect=collectRepository.findOne(id);
+		Collect collect=collectRepository.findById(id);
 		return collect;
 	}
 	
@@ -352,27 +360,22 @@ public class CollectController extends BaseController{
 	}
 	
 	
-	
-	
-	
 	@RequestMapping(value="/searchMy/{key}")
 	public List<CollectSummary> searchMy(Model model,@RequestParam(value = "page", defaultValue = "0") Integer page,
 	        @RequestParam(value = "size", defaultValue = "20") Integer size, @PathVariable("key") String key) {
 		Sort sort = new Sort(Direction.DESC, "id");
-	    Pageable pageable = new PageRequest(page, size, sort);
+	    Pageable pageable = PageRequest.of(page, size,sort);
 	    List<CollectSummary> myCollects=collectService.searchMy(getUserId(),key ,pageable);
 		model.addAttribute("myCollects", myCollects);
 		logger.info("searchMy end :");
 		return myCollects;
 	}
 	
-	
-	
 	@RequestMapping(value="/searchOther/{key}")
 	public List<CollectSummary> searchOther(Model model,@RequestParam(value = "page", defaultValue = "0") Integer page,
 	        @RequestParam(value = "size", defaultValue = "20") Integer size, @PathVariable("key") String key) {
 		Sort sort = new Sort(Direction.DESC, "id");
-	    Pageable pageable = new PageRequest(page, size, sort);
+	    Pageable pageable = PageRequest.of(page, size,sort);
 	    List<CollectSummary> otherCollects=collectService.searchOther(getUserId(), key, pageable);
 		logger.info("searchOther end :");
 		return otherCollects;
@@ -390,6 +393,5 @@ public class CollectController extends BaseController{
 		maps.put("praiseCount",praiseCount);
 		return maps;
 	}
-	
 	
 }

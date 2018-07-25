@@ -2,11 +2,7 @@ package com.favorites.domain;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 /**
  * 评论
@@ -19,7 +15,7 @@ public class Comment extends Entitys implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private Long id;
 	@Column(nullable = false)
 	private Long collectId;
@@ -39,10 +35,6 @@ public class Comment extends Entitys implements Serializable {
 	private String replyUserName;
 	@Transient
 	private String profilePicture;
-
-	public Comment() {
-		super();
-	}
 
 	public Long getId() {
 		return id;
@@ -88,14 +80,6 @@ public class Comment extends Entitys implements Serializable {
 		return createTime;
 	}
 
-	public String getProfilePicture() {
-		return profilePicture;
-	}
-
-	public void setProfilePicture(String profilePicture) {
-		this.profilePicture = profilePicture;
-	}
-
 	public void setCreateTime(Long createTime) {
 		this.createTime = createTime;
 	}
@@ -116,12 +100,19 @@ public class Comment extends Entitys implements Serializable {
 		this.userName = userName;
 	}
 
-  public String getReplyUserName() {
-    return replyUserName;
-  }
+	public String getReplyUserName() {
+		return replyUserName;
+	}
 
-  public void setReplyUserName(String replyUserName) {
-    this.replyUserName = replyUserName;
-  }
+	public void setReplyUserName(String replyUserName) {
+		this.replyUserName = replyUserName;
+	}
 
+	public String getProfilePicture() {
+		return profilePicture;
+	}
+
+	public void setProfilePicture(String profilePicture) {
+		this.profilePicture = profilePicture;
+	}
 }

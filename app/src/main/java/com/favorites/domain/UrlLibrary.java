@@ -1,9 +1,6 @@
 package com.favorites.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
@@ -13,11 +10,11 @@ import java.io.Serializable;
 public class UrlLibrary extends Entitys implements Serializable{
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(600)")
     private String url;
-    @Column(nullable = true)
+    @Column(nullable = true,columnDefinition = "varchar(300)")
     private String logoUrl;
     @Column(columnDefinition="INT default 0")
     private int count;

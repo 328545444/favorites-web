@@ -4,11 +4,11 @@
 云收藏 - 让收藏更简单
 =========================
 
-![Build Status](https://img.shields.io/appveyor/ci/gruntjs/grunt.svg) 
+![Spring Boot 2.0](https://img.shields.io/badge/Spring%20Boot-2.0-brightgreen.svg)
+![Thymeleaf 3.0](https://img.shields.io/badge/Thymeleaf-3.0-yellow.svg)
+![Mysql 5.6](https://img.shields.io/badge/Mysql-5.6-blue.svg)
 ![JDK 1.8](https://img.shields.io/badge/JDK-1.8-brightgreen.svg)
-![Spring Boot 1.5.8](https://img.shields.io/badge/Spring%20Boot-1.5.8-green.svg)
 ![Maven](https://img.shields.io/badge/Maven-3.5.0-yellowgreen.svg)
-![Gradle](https://img.shields.io/badge/Gradle-4.6-orange.svg)
 ![license](https://img.shields.io/badge/license-MPL--2.0-blue.svg)
  
 
@@ -74,7 +74,7 @@ Docker Deploy
 下载最新发布版本
 
 ``` sh
-wget https://github.com/cloudfavorites/favorites-web/archive/favorites-1.1.1.zip
+wget https://github.com/cloudfavorites/favorites-web/archive/favorites-1.3.0.zip
 ```
 
 解压
@@ -124,4 +124,4 @@ Discussing
 --------
 关注公众号：纯洁的微笑，回复"springboot"进群交流
 
-![](http://www.ityouknow.com/assets/images/keeppuresmile.jpg)
+![](http://www.ityouknow.com/assets/images/keeppuresmile_430.jpg)
